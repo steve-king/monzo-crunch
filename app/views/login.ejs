@@ -15,7 +15,12 @@
       callbackURL: '<%-process.env.AUTH0_CALLBACK_URL %>',
       container: 'auth0-login',
       primaryColor: '#14233c',
-      icon: '/images/logo.png'
+      icon: '/images/logo.png',
+      gravatar: false,
+      focusInput: true,
+      dict: {
+        title: "Monzo to Crunch"
+      }
     });
   }
   login();
