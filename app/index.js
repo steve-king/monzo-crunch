@@ -1,10 +1,10 @@
 const express = require('express');
 const app = express();
 
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv');
 const morgan = require('morgan');
 app.use(morgan('dev'));
-dotenv.load();
+// dotenv.load();
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -31,6 +31,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(routes);
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 5000;
 app.listen(port);
 console.log('Server running at http://localhost:' + port);

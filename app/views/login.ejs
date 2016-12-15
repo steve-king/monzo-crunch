@@ -1,12 +1,24 @@
-<% include partials/head.ejs %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+<div id="auth0-login"></div>
 <script src="https://cdn.auth0.com/js/lock-passwordless-2.2.min.js"></script>
 <script type="text/javascript">
   function login(){
     // Initialize Passwordless Lock instance
     var lock = new Auth0LockPasswordless('<%-process.env.AUTH0_CLIENT_ID %>', '<%-process.env.AUTH0_DOMAIN %>');
-    lock.magiclink( {callbackURL: '<%-process.env.AUTH0_CALLBACK_URL %>'} );
+    lock.magiclink({
+      callbackURL: '<%-process.env.AUTH0_CALLBACK_URL %>',
+      container: 'auth0-login',
+      primaryColor: '#14233c',
+      icon: '/images/logo.png'
+    });
   }
   login();
 </script>
-<a href="javascript:login()">Login</a>
-<% include partials/scripts.ejs %>
+</body>
+</html>

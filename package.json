@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "scripts": {
     "test": "",
-    "start": "nodemon app/server.js --ignore node_modules/ --ignore app/public"
+    "start": "nodemon app/index.js --ignore node_modules/ --ignore app/public"
   },
   "dependencies": {
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "^1.4.3",
-    "dotenv": "^2.0.0",
     "ejs": "^2.5.5",
     "express": "^4.14.0",
     "express-session": "^1.14.2",
+    "mongodb": "^2.2.16",
     "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-auth0": "^0.6.0",

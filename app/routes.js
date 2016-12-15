@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn('/');
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn('/login');
 
-router.get('/', (req, res) => {
+router.get('/login', (req, res) => {
+  if (req.user) {
+    res.redirect('/');
+    return;
+  }
+
   res.render('login');
 });
 
@@ -11,12 +16,12 @@ router.get('/', (req, res) => {
 router.get('/authenticate',
   passport.authenticate('auth0', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/dashboard');
+    res.redirect('/');
   }
 );
 
 // Get the user profile
-router.get('/dashboard', ensureLoggedIn, function(req, res, next) {
+router.get('/', ensureLoggedIn, function(req, res, next) {
   // res.render('dashboard', { user: req.user });
   res.json(req.user);
 });
