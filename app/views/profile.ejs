@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+
+  <% if (locals.user.monzo) { %>
+    <p><a href="/monzo/disconnect">Disconnect Monzo</a></p>
+  <% } else { %>
+    <p><a href="/monzo/login">Connect Monzo</a></p>
+  <% } %>
+  <% if (!user.crunch_access_token) { %>
+    <p><a href="/crunch/login">Connect Crunch</a>
+    <form method="GET" action="/crunch/connect">
+      <p>
+        <input type="text" name="code" placeholder="Crunch verification code" />
+        <button type="submit">Connect</button>
+      </p>
+    </form>
+  <% } %>
+
+</body>
+</html>

@@ -22,7 +22,7 @@ exports.getAuthURL = (req) => {
   })
 }
 
-exports.getAccessToken = (authCode, callback) => {
+exports.getAccessToken = (authToken, callback) => {
   request({
       url: API_BASE+'/oauth2/token',
       method: 'POST',
@@ -31,7 +31,7 @@ exports.getAccessToken = (authCode, callback) => {
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
         redirect_uri: AUTH_REDIRECT_URL,
-        code: authCode
+        code: authToken
       }
     }, (err, res, body) => {
       if (err) throw err;

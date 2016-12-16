@@ -4,6 +4,10 @@ const router = express.Router();
 const Monzo = require('../services/Monzo');
 const User = require('../services/User');
 
+router.use('/login', (req, res) => {
+  res.redirect(Monzo.getAuthURL(req));
+});
+
 router.get('/connect', (req, res) => {
   if (!req.query.code) {
     res.json({

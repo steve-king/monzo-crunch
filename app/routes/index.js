@@ -5,6 +5,7 @@ const auth = require('connect-ensure-login').ensureLoggedIn('/');
 
 router.use('/profile', auth, require('./profile'));
 router.use('/monzo', auth, require('./monzo'));
+router.use('/crunch', auth, require('./crunch'));
 router.use('transactions', require('./transactions'));
 
 // Login page

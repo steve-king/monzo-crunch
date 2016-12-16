@@ -1,22 +1,13 @@
 const express = require('express');
 const router = express.Router();
-
-const Monzo = require('../services/Monzo');
 const getUser = require('../middleware/user');
 
 router.get('/', getUser, (req, res) => {
-  
-  // If no monzo_access_token, get monzo auth url
-  if (!req.user.monzo || !req.user.monzo.access_token) {
-    req.monzoAuthURL = Monzo.getAuthURL(req);
-  }
 
-  // If no crunch_access_token, get crunch auth url
-  // FUTURE: Grab anything else needed for dashboard e.g. list of Crunch suppliers, Monzo categories? etc
+  // FUTURE: Grab anything needed for display here e.g. list of Crunch suppliers, Monzo categories? etc
 
-  res.render('dashboard', {
+  res.render('profile', {
     user: req.user,
-    monzoAuthURL: req.monzoAuthURL
   });
 });
 
