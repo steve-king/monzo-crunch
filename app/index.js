@@ -16,7 +16,7 @@ app.use(session({
   saveUninitialized: true
 }));
 
-const passport = require('./auth');
+const passport = require('./config/auth');
 app.use(passport.initialize());
 app.use(passport.session());
 
