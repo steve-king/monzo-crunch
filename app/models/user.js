@@ -7,17 +7,29 @@ mongodb.MongoClient.connect(process.env.MONGODB_URI, function(error, database){
   db = database;
 });
 
-exports.create = function(auth0_user_id, email, callback) {
-  const user = { auth0_user_id, email };
-  db.collection('users').insert(user, function(error, result) {
+exports.create = function(query, callback) {
+  // const user = { auth0_user_id, email };
+  db.collection('users').insert(query, function(error, result) {
     if (error) throw error;
     callback(result.ops[0]);
   });
 }
 
-exports.getByUserId = function(auth0_user_id, callback) {
-  db.collection('users').findOne({ auth0_user_id }, function(error, result){
+exports.get = function(query, callback) {
+  db.collection('users').findOne(query, function(error, result){
     if (error) throw error;
     callback(result);
   });
+}
+
+exports.update = function(query, update, callback) {
+  db.collection('users').findOneAndUpdate(
+    query,
+    update,
+    { returnOriginal: false },
+    function(error, result){
+      if (error) throw error;
+      callback(result.value);
+    }
+  );
 }

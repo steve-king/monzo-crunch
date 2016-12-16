@@ -11,7 +11,11 @@ var strategy = new Auth0Strategy({
   // accessToken is the token to call Auth0 API (not needed in the most cases)
   // extraParams.id_token has the JSON Web Token
   // profile has all the information from the user
-  return done(null, profile);
+  var user = {
+    auth0_id: profile.identities[0].user_id,
+    email: profile.emails[0].value
+  };
+  return done(null, user);
 });
 
 passport.use(strategy);

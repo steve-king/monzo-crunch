@@ -5,15 +5,17 @@ module.exports = function(req, res, next) {
   var userSession = req.session.passport.user;
   if (userSession) {
 
-    var userId = userSession.identities[0].user_id;
-    var email = userSession.emails[0].value;
+    var userQuery = {
+      auth0_id: userSession.auth0_id,
+      email: userSession.email
+    };
 
-    User.getByUserId(userId, theUser => {
+    User.get(userQuery, theUser => {
       if (theUser) { // Existing user found
         req.user = theUser;
         next();
       } else { // User not found in the DB. Create and return a new one
-        userModel.create(userId, email, newUser => {
+        User.create(userQuery, newUser => {
           req.user = newUser;
           next();
         });
@@ -21,6 +23,30 @@ module.exports = function(req, res, next) {
     });
 
   } else {
-    next();
+    res.json({
+      success: false,
+      message: 'No user session found'
+    });
   }
 }
+
+
+// DEV ONLY
+// module.exports = function(req, res, next) {
+//
+//   var userId = '1';
+//   var email = 'steve.king5891@gmail.com';
+//
+//   User.getByUserId(userId, theUser => {
+//     if (theUser) { // Existing user found
+//       req.user = theUser;
+//       // console.log(req.user);
+//       next();
+//     } else { // User not found in the DB. Create and return a new one
+//       User.create(userId, email, newUser => {
+//         req.user = newUser;
+//         next();
+//       });
+//     }
+//   });
+// }

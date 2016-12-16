@@ -5,6 +5,14 @@
   <title></title>
 </head>
 <body>
-  <%=user.email%>
+
+  <% if (!locals.user.monzo) { %>
+    <a href="<%=monzoAuthURL %>">Connect Monzo</a>
+  <% } %>
+
+  <% if (!user.crunch_access_token) { %>
+    <a href="#">Connect Crunch</a>
+  <% } %>
+
 </body>
 </html>
