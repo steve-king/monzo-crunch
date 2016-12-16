@@ -6,10 +6,12 @@
 </head>
 <body>
 
-  <% if (!locals.user.monzo) { %>
+  <% if (locals.user.monzo) { %>
+    <a href="/monzo/disconnect">Disconnect Monzo</a>
+  <% } else { %>
     <a href="<%=monzoAuthURL %>">Connect Monzo</a>
   <% } %>
-
+  |
   <% if (!user.crunch_access_token) { %>
     <a href="#">Connect Crunch</a>
   <% } %>

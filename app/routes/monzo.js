@@ -1,8 +1,10 @@
-var monzo = require('../helpers/monzo');
-var User = require('../models/user');
+const express = require('express');
+const router = express.Router();
 
-module.exports = function(req, res, next){
+const Monzo = require('../services/Monzo');
+const User = require('../services/User');
 
+router.get('/connect', (req, res) => {
   if (!req.query.code) {
     res.json({
       success: false,
@@ -19,18 +21,27 @@ module.exports = function(req, res, next){
     return;
   }
 
-  monzo.getAccessToken(req.query.code, function(response){
+  Monzo.getAccessToken(req.query.code, function(response){
     if (response.access_token) {
       var auth0_id = req.user.auth0_id;
       User.update(
         { auth0_id },
         { $set: { monzo: response } },
-        (user) => {
-          req.user = user;
-          next();
-        })
+        () => res.redirect('/')
+      );
     } else {
       res.json(response);
     }
   });
-}
+});
+
+router.get('/disconnect', (req, res) => {
+  var auth0_id = req.user.auth0_id;
+  User.update(
+    { auth0_id },
+    { $unset: { monzo: 1 } },
+    () => res.redirect('/')
+  );
+});
+
+module.exports = router;

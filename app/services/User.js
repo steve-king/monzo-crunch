@@ -26,7 +26,7 @@ exports.update = function(query, update, callback) {
   db.collection('users').findOneAndUpdate(
     query,
     update,
-    { returnOriginal: false },
+    { /*returnOriginal: false*/ },
     function(error, result){
       if (error) throw error;
       callback(result.value);

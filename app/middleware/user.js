@@ -1,21 +1,14 @@
-var User = require('../models/user');
+var User = require('../services/User');
 
 module.exports = function(req, res, next) {
+  if (req.user.auth0_id) {
 
-  var userSession = req.session.passport.user;
-  if (userSession) {
-
-    var userQuery = {
-      auth0_id: userSession.auth0_id,
-      email: userSession.email
-    };
-
-    User.get(userQuery, theUser => {
+    User.get(req.user, theUser => {
       if (theUser) { // Existing user found
         req.user = theUser;
         next();
       } else { // User not found in the DB. Create and return a new one
-        User.create(userQuery, newUser => {
+        User.create(req.user, newUser => {
           req.user = newUser;
           next();
         });

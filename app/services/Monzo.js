@@ -6,7 +6,7 @@ const BASE_URL = process.env.BASE_URL;
 const API_BASE = 'https://api.monzo.com';
 const CLIENT_ID = process.env.MONZO_CLIENT_ID;
 const CLIENT_SECRET = process.env.MONZO_CLIENT_SECRET;
-const AUTH_REDIRECT_URL = BASE_URL + '/authenticate-monzo';
+const AUTH_REDIRECT_URL = BASE_URL + '/monzo/connect';
 
 exports.getAuthURL = (req) => {
   req.session.oAuthStateToken = crypto.randomBytes(64).toString('hex');
