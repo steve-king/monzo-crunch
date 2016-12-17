@@ -71,18 +71,18 @@ class Crunch {
   getAccessToken(req){
     return new Promise((resolve, reject) => {
 
-      /* This is where I'm stuck. I have the following things available:
+      /*
+         This is where I'm stuck! I have the following things available:
          - crunch.oauth_token - received from above request to /oauth/request_token
          - crunch.oauth_token_secret - as above
          - req.query.code - this is the code that the user received from crunch when authorising this app
 
-         I'm not sure exactly where in the below code I need to enter any/all of the above tokens
-         Documentation for the oauth1.0a npm module is here: https://www.npmjs.com/package/oauth-1.0a
+         I'm not sure exactly where in the below code I need to enter any (or all) of the above tokens?
+         With the below code, the response from Crunch is always "parameter_absent" so I'm clearly not
+         naming a paramter correctly or not sending it in the right part of the request...
 
-         With the below code, the response from Crunch is always "parameter_absent"
-
+         The documentation for the oauth1.0a npm module is here: https://www.npmjs.com/package/oauth-1.0'
          AUTH_API_BASE = 'https://demo.crunch.co.uk/crunch-core'
-
       */
 
       var requestData = {
