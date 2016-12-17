@@ -4,10 +4,11 @@ const router = express.Router();
 const Crunch = require('../services/Crunch');
 
 router.use('/login', (req, res) => {
-  Crunch.getAuthURL().then(authURL => res.redirect(authURL));
+  Crunch.getAuthURL(req).then(authURL => res.redirect(authURL));
 })
 
 router.get('/connect', (req, res) => {
+
   if (!req.query.code) {
     res.json({
       success: false,
@@ -15,8 +16,8 @@ router.get('/connect', (req, res) => {
     });
     return;
   }
-
-  Crunch.getAccessToken(req.query.code).then(function(response){
+  
+  Crunch.getAccessToken(req).then(function(response){
     // if (response.access_token) {
     //   var auth0_id = req.user.auth0_id;
     //   User.update(
