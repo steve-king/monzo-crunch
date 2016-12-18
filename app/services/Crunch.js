@@ -1,5 +1,4 @@
 'use strict';
-
 const OAuth = require('oauth-1.0a');
 const request = require('request');
 const url = require('url');
@@ -106,7 +105,7 @@ class Crunch {
         method: requestData.method,
         form: this.oAuth.authorize(requestData, token)
       }, function(error, response, body) {
-        if (error) reject(error);
+        if (error) throw error;
         resolve(body);
       });
 

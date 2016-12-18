@@ -7,10 +7,17 @@
 <body>
 
   <% if (locals.user.monzo) { %>
+    <h2>Monzo account connected</h2>
+    <ul>
+      <li>Name: <%=user.monzo.accounts[0].description %></li>
+      <li>User ID: <%=user.monzo.user_id %></li>
+      <li>Account ID: <%=user.monzo.accounts[0].id %></li>
+    </ul>
     <p><a href="/monzo/disconnect">Disconnect Monzo</a></p>
   <% } else { %>
     <p><a href="/monzo/login">Connect Monzo</a></p>
   <% } %>
+  <hr>
   <% if (!user.crunch_access_token) { %>
     <p><a href="/crunch/login">Connect Crunch</a>
     <form method="GET" action="/crunch/connect">

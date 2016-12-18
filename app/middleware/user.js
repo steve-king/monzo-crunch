@@ -1,7 +1,7 @@
 var User = require('../services/User');
 
 module.exports = function(req, res, next) {
-  if (req.user.auth0_id) {
+  if (req.user.id) {
 
     User.get(req.user, theUser => {
       if (theUser) { // Existing user found

@@ -9,43 +9,32 @@ router.use('/login', (req, res) => {
 });
 
 router.get('/connect', (req, res) => {
+  var error = null;
+
   if (!req.query.code) {
-    res.json({
-      success: false,
-      message: 'Missing authentication code'
-    });
-    return;
+    error = { success: false, message: 'Missing auth code' };
   }
 
-  if (req.query.state !== req.session.oAuthStateToken) {
-    res.json({
-      success: false,
-      message: 'oAuth2.0 state token mismatch'
-    });
-    return;
+  if (req.query.state !== req.session.oAuthStateSecret) {
+    error = { success: false, message: 'oAuth2.0 state token mismatch' };
   }
 
-  Monzo.getAccessToken(req.query.code, function(response){
-    if (response.access_token) {
-      var auth0_id = req.user.auth0_id;
-      User.update(
-        { auth0_id },
-        { $set: { monzo: response } },
-        () => res.redirect('/')
-      );
-    } else {
-      res.json(response);
-    }
-  });
+  if (error) {
+    res.json(error);
+  } else {
+    Monzo.getAccessToken(req.query.code)
+      .then((data) => User.set(req.user.id, { monzo: data }))
+      .then((user) => Monzo.getAccounts(user.monzo.access_token))
+      .then((accounts) => User.set(req.user.id, { 'monzo.accounts': accounts }))
+      .then(() => res.redirect('/'))
+      .catch((error) => res.json({ error: error }));
+  }
 });
 
 router.get('/disconnect', (req, res) => {
-  var auth0_id = req.user.auth0_id;
-  User.update(
-    { auth0_id },
-    { $unset: { monzo: 1 } },
-    () => res.redirect('/')
-  );
+  User
+    .unset(req.user.id, 'monzo')
+    .then(() => res.redirect('/'));
 });
 
 module.exports = router;

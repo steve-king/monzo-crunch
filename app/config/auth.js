@@ -12,7 +12,7 @@ var strategy = new Auth0Strategy({
   // extraParams.id_token has the JSON Web Token
   // profile has all the information from the user
   var user = {
-    auth0_id: profile.identities[0].user_id,
+    id: profile.identities[0].user_id,
     email: profile.emails[0].value
   };
   return done(null, user);

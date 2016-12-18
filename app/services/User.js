@@ -1,35 +1,63 @@
+'use strict';
 const mongodb = require('mongodb');
+const flat = require('flat');
 
-var db;
-mongodb.MongoClient.connect(process.env.MONGODB_URI, function(error, database){
-  if (error) throw error;
-  console.log('Connected to MongoDB');
-  db = database;
-});
+class User {
+  constructor() {
+    mongodb.MongoClient.connect(
+      process.env.MONGODB_URI,
+      (error, database) => {
+        if (error) throw error;
+        console.log('Connected to MongoDB');
+        this.collection = database.collection('users');
+      }
+    );
+  }
 
-exports.create = function(query, callback) {
-  // const user = { auth0_user_id, email };
-  db.collection('users').insert(query, function(error, result) {
-    if (error) throw error;
-    callback(result.ops[0]);
-  });
-}
-
-exports.get = function(query, callback) {
-  db.collection('users').findOne(query, function(error, result){
-    if (error) throw error;
-    callback(result);
-  });
-}
-
-exports.update = function(query, update, callback) {
-  db.collection('users').findOneAndUpdate(
-    query,
-    update,
-    { /*returnOriginal: false*/ },
-    function(error, result){
+  get(query, callback) {
+    this.collection.findOne(query, (error, result) => {
       if (error) throw error;
-      callback(result.value);
-    }
-  );
+      callback(result);
+    })
+  }
+
+  create(query, callback) {
+    this.collection.insert(query, (error, result) => {
+      if (error) throw error;
+      callback(result.ops[0]);
+    })
+  }
+
+  set(id, data) {
+    var update = flat(data, { safe: true });
+
+    return new Promise((resolve, reject) => {
+      this.collection.findOneAndUpdate(
+        { id },
+        { $set: update },
+        { returnOriginal: false },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.value);
+          }
+        }
+      )
+    });
+  }
+
+  unset(id, keyToDelete) {
+    return new Promise((resolve, reject) => {
+      this.collection.findOneAndUpdate(
+        { id },
+        { $unset: { [keyToDelete] : 1 } },
+        (error, result) => {
+          (error) ? reject(error) : resolve(result);
+        }
+      )
+    })
+  }
 }
+
+module.exports = new User();
