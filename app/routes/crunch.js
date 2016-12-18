@@ -16,19 +16,9 @@ router.get('/connect', (req, res) => {
     });
     return;
   }
-  
-  Crunch.getAccessToken(req).then(function(response){
-    // if (response.access_token) {
-    //   var auth0_id = req.user.auth0_id;
-    //   User.update(
-    //     { auth0_id },
-    //     { $set: { crunch: response } },
-    //     () => res.redirect('/')
-    //   );
-    // } else {
-    //   res.json(response);
-    // }
-    res.json(response);
-  });
+
+  Crunch.getAccessToken(req)
+    .then(result => res.json(result))
+    .catch((error, body) => res.json({ error, body }));
 });
 module.exports = router;

@@ -1,8 +1,8 @@
 'use strict';
-const OAuth = require('oauth-1.0a');
 const request = require('request');
 const url = require('url');
-const querystring = require('querystring');
+const qs = require('querystring');
+const deepcopy = require('deepcopy');
 
 const BASE_URL = process.env.BASE_URL;
 const API_BASE = process.env.CRUNCH_API_BASE;
@@ -13,14 +13,14 @@ const AUTH_REDIRECT_URL = BASE_URL + '/crunch/connect';
 
 class Crunch {
   constructor() {
-    // Configure the oauth-1.0a module
-    this.oAuth = OAuth({
-      consumer: {
-        key: CLIENT_ID,
-        secret: CLIENT_SECRET
-      },
+    this.oauth = {
+      // Adding the callback param here always causes a 'Wrong callback URI' response from '/oauth/request_token'
+      // --------------------------------------------------------------------------------------------------------
+      // callback: AUTH_REDIRECT_URL,
+      consumer_key: CLIENT_ID,
+      consumer_secret: CLIENT_SECRET,
       signature_method: 'PLAINTEXT'
-    })
+    }
   }
 
   // Request a temporary token from crunch
@@ -28,40 +28,30 @@ class Crunch {
   getAuthURL(req, callback) {
     return new Promise((resolve, reject) => {
 
-      var requestData = {
+      request({
         url: AUTH_API_BASE + '/oauth/request_token',
         method: 'POST',
-      };
-
-      request({
-        url: requestData.url,
-        method: requestData.method,
-        form: this.oAuth.authorize(requestData) // Sign the requestData
+        oauth: this.oauth
       }, function(error, response, body) {
-        if (error) throw error;
+        if (error) reject(error);
 
         // Parse response
-        var responseParams = querystring.parse(body);
+        var responseParams = qs.parse(body);
         console.log(responseParams);
 
-        // Store returned token/secret in session?
-        // - In order to exchange for access token later on?
+        /* Should I store the returned token/secret in the session
+           in order to exchange for an access token later on? */
         req.session.crunch = {
           oauth_token: responseParams.oauth_token,
           oauth_token_secret: responseParams.oauth_token_secret
         };
 
-        // Build and return the login URL
-        /*
-          oauth_callback parameter does not work.
-          Crunch always gives a code to copy and paste.
-          Why is this?
-        */
-        var queryString = querystring.stringify({
+        // Create and return the login URL
+        var query = qs.stringify({
           oauth_token: responseParams.oauth_token,
-          oauth_callback: AUTH_REDIRECT_URL
+          callback: AUTH_REDIRECT_URL
         });
-        var authURL = AUTH_API_BASE+'/login/oauth-login.seam?'+queryString;
+        var authURL = AUTH_API_BASE+'/login/oauth-login.seam?'+query;
         resolve(authURL);
       });
     });
@@ -69,44 +59,34 @@ class Crunch {
 
   getAccessToken(req){
     return new Promise((resolve, reject) => {
-
       /*
          This is where I'm stuck! I have the following things available:
          - crunch.oauth_token - received from above request to /oauth/request_token
          - crunch.oauth_token_secret - as above
-         - req.query.code - this is the code that the user received from crunch when authorising this app
+         - req.query.code - this is the copy/paste code the user received from crunch when authorising this app
 
          I'm not sure exactly where in the below code I need to enter any (or all) of the above tokens?
          With the below code, the response from Crunch is always "parameter_absent" so I'm clearly not
          naming a paramter correctly or not sending it in the right part of the request...
 
-         The documentation for the oauth1.0a npm module is here: https://www.npmjs.com/package/oauth-1.0'
+         oauth documentation for the request module is here: https://www.npmjs.com/package/request#oauth-signing
          AUTH_API_BASE = 'https://demo.crunch.co.uk/crunch-core'
       */
 
-      var requestData = {
-        url: AUTH_API_BASE + '/oauth/access_token',
-        method: 'POST',
-        data: {
-          oauth_token:  req.session.crunch.oauth_token,
-          oauth_token_secret: req.session.crunch.oauth_token_secret
-        }
-      };
-
-      var token = {
-        key: req.session.crunch.oauth_token, //req.query.code
-        secret: req.session.crunch.oauth_token_secret
-      }
-
-      console.log(requestData);
+      var oauth = deepcopy(this.oauth);
+      oauth.token = req.query.code;
+      oauth.token_secret = req.session.crunch.oauth_token_secret;
 
       request({
-        url: requestData.url,
-        method: requestData.method,
-        form: this.oAuth.authorize(requestData, token)
+        url: AUTH_API_BASE + '/oauth/access_token',
+        method: 'POST',
+        oauth: oauth
       }, function(error, response, body) {
-        if (error) throw error;
-        resolve(body);
+        if (error) {
+          reject({ error, body })
+        } else {
+          resolve(body);
+        };
       });
 
     });

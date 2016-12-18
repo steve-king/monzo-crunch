@@ -3,7 +3,7 @@ var User = require('../services/User');
 module.exports = function(req, res, next) {
   if (req.user.id) {
 
-    User.get(req.user, theUser => {
+    User.get({ id: req.user.id }, theUser => {
       if (theUser) { // Existing user found
         req.user = theUser;
         next();

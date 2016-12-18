@@ -26,27 +26,36 @@ class Monzo {
     })
   }
 
-  getAccessToken(authToken, auth0_id) {
+  getAccessToken(req) {
     return new Promise((resolve, reject) => {
-      request({
-        url: API_BASE+'/oauth2/token',
-        method: 'POST',
-        form: {
-          grant_type: 'authorization_code',
-          client_id: CLIENT_ID,
-          client_secret: CLIENT_SECRET,
-          redirect_uri: AUTH_REDIRECT_URL,
-          code: authToken
-        }
-      }, (err, res, body) => {
-        if (err) reject(err);
-        var data = JSON.parse(body);
-        resolve({
-          user_id: data.user_id,
-          access_token: data.access_token,
-          refresh_token: data.refresh_token
+
+      if (!req.query.code) {
+        reject('Missing auth code');
+      } else
+      if (req.query.state !== req.session.oAuthStateSecret) {
+        reject('oAuth2.0 state token mismatch');
+      } else {
+        request({
+          url: API_BASE+'/oauth2/token',
+          method: 'POST',
+          form: {
+            grant_type: 'authorization_code',
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            redirect_uri: AUTH_REDIRECT_URL,
+            code: req.query.code
+          }
+        }, (err, res, body) => {
+          if (err) reject(err);
+
+          var data = JSON.parse(body);
+          resolve({
+            user_id: data.user_id,
+            access_token: data.access_token,
+            refresh_token: data.refresh_token
+          });
         });
-      });
+      }
     });
   }
 
