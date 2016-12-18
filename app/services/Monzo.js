@@ -45,8 +45,8 @@ class Monzo {
             redirect_uri: AUTH_REDIRECT_URL,
             code: req.query.code
           }
-        }, (err, res, body) => {
-          if (err) reject(err);
+        }, (e, r, body) => {
+          if (e) reject(e);
 
           var data = JSON.parse(body);
           resolve({
@@ -65,13 +65,65 @@ class Monzo {
         url: API_BASE+'/accounts',
         method: 'GET',
         auth: { bearer: access_token }
-      }, (error, response, body) => {
-        console.log(body);
-        if (error) {
-          reject(error);
-        } else {
+      }, (e, r, body) => {
+        if (e) { reject(e); } else {
           var data = JSON.parse(body);
           resolve(data.accounts);
+        }
+      });
+    });
+  }
+
+  registerWebhook(access_token, account_id) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/webhooks',
+        method: 'POST',
+        auth: { bearer: access_token },
+        form: {
+          url: BASE_URL+'/transactions',
+          id: 'transaction.created',
+          account_id
+        }
+      }, (e, r, body) => {
+        if (e) { reject(e); } else {
+          console.log('REGISTER WEBOOK:' + body);
+          resolve(JSON.parse(body));
+        }
+      })
+    });
+  }
+
+  listWebhooks(access_token, account_id) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/webhooks&account_id='+account_id,
+        // method: 'GET',
+        auth: { bearer: access_token }
+      }, (e, r, body) => {
+        if (e) { reject(e); } else {
+          var data = JSON.parse(body);
+          console.log('LIST WEBOOKS:' + data);
+          if (data.webooks) {
+            resolve(data.webhooks);
+          } else {
+            resolve([]);
+          }
+        }
+      });
+    });
+  }
+
+  deleteWebhooks(access_token, webhooks) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/webhooks/'+webhook_id,
+        method: 'DELETE',
+        auth: { bearer: access_token }
+      }, (e, r, body) => {
+        if (e) { reject(e); } else {
+          console.log('DELETE WEBOOK:' + body);
+          resolve(JSON.parse(body));
         }
       });
     });
