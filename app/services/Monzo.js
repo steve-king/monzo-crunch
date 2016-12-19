@@ -128,6 +128,44 @@ class Monzo {
       });
     });
   }
+
+  getBalance(access_token, account_id) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/balance&account_id='+account_id,
+        auth: { bearer: access_token }
+      }, (error, r, body) => {
+        var data = JSON.parse(body);
+        if (!error && r.statusCode == 200) {
+          resolve(data);
+        } else {
+          reject({
+            status: r.statusCode,
+            error: error || data
+          });
+        }
+      });
+    })
+  }
+
+  getTransactions(access_token, account_id) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/transactions&account_id='+account_id,
+        auth: { bearer: access_token }
+      }, (error, r, body) => {
+        var data = JSON.parse(body);
+        if (!error && r.statusCode == 200) {
+          resolve(data);
+        } else {
+          reject({
+            status: r.statusCode,
+            error: error || data
+          });
+        }
+      });
+    })
+  }
 };
 
 module.exports = new Monzo();

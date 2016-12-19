@@ -13,6 +13,11 @@
       <li>User ID: <%=user.monzo.user_id %></li>
       <li>Account ID: <%=user.monzo.accounts[0].id %></li>
     </ul>
+    <% if (locals.balance) { %>
+    <ul>
+      <li>Card balance: £<%=balance.balance %></li>
+    </ul>
+    <% } %>
     <p><a href="/monzo/disconnect">Disconnect Monzo</a></p>
   <% } else { %>
     <p><a href="/monzo/login">Connect Monzo</a></p>
