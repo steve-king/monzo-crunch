@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "test": "",
-    "start": "nodemon app/index.js --ignore node_modules/ --ignore app/public"
+    "dev": "nodemon app/index.js --ignore node_modules/ --ignore app/public",
+    "start": "node app/index.js"
   },
   "dependencies": {
     "connect-ensure-login": "^0.1.1",
