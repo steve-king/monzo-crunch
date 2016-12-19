@@ -18,8 +18,15 @@
     <p><a href="/monzo/login">Connect Monzo</a></p>
   <% } %>
   <hr>
-  <% if (!user.crunch_access_token) { %>
-    <p><a href="/crunch/login">Connect Crunch</a>
+  <% if (locals.user.crunch) { %>
+    <h2>Crunch account connected</h2>
+    <ul>
+      <li>oauth_token: <%=user.crunch.oauth_token %></li>
+      <li>oauth_token_secret: <%=user.crunch.oauth_token_secret %></li>
+    </ul>
+    <p><a href="/crunch/disconnect">Disconnect Crunch</a></p>
+  <% } else { %>
+    <p><a href="/crunch/login" target="_blank">Connect Crunch</a>
     <form method="GET" action="/crunch/connect">
       <p>
         <input type="text" name="code" placeholder="Crunch verification code" />

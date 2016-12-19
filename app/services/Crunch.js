@@ -23,32 +23,27 @@ class Crunch {
     }
   }
 
-  // Request a temporary token from crunch
-  // Return a Crunch login URL
+  // Request a temporary token and secret from crunch and return a login URL
   getAuthURL(req, callback) {
     return new Promise((resolve, reject) => {
-
       request({
         url: AUTH_API_BASE + '/oauth/request_token',
         method: 'POST',
         oauth: this.oauth
       }, function(error, response, body) {
         if (error) reject(error);
+        var data = qs.parse(body);
 
-        // Parse response
-        var responseParams = qs.parse(body);
-        console.log(responseParams);
-
-        /* Should I store the returned token/secret in the session
-           in order to exchange for an access token later on? */
+        // Store token/secret in session
+        // - Will be exchanged for some permanent creds when user enters their verification code
         req.session.crunch = {
-          oauth_token: responseParams.oauth_token,
-          oauth_token_secret: responseParams.oauth_token_secret
+          oauth_token: data.oauth_token,
+          oauth_token_secret: data.oauth_token_secret
         };
 
-        // Create and return the login URL
+        // Compose and return the login URL
         var query = qs.stringify({
-          oauth_token: responseParams.oauth_token,
+          oauth_token: data.oauth_token,
           callback: AUTH_REDIRECT_URL
         });
         var authURL = AUTH_API_BASE+'/login/oauth-login.seam?'+query;
@@ -59,36 +54,24 @@ class Crunch {
 
   getAccessToken(req){
     return new Promise((resolve, reject) => {
-      /*
-         This is where I'm stuck! I have the following things available:
-         - crunch.oauth_token - received from above request to /oauth/request_token
-         - crunch.oauth_token_secret - as above
-         - req.query.code - this is the copy/paste code the user received from crunch when authorising this app
-
-         I'm not sure exactly where in the below code I need to enter any (or all) of the above tokens?
-         With the below code, the response from Crunch is always "parameter_absent" so I'm clearly not
-         naming a paramter correctly or not sending it in the right part of the request...
-
-         oauth documentation for the request module is here: https://www.npmjs.com/package/request#oauth-signing
-         AUTH_API_BASE = 'https://demo.crunch.co.uk/crunch-core'
-      */
+      if (!req.query.code) {
+        reject('Missing verification code'); return;
+      }
 
       var oauth = deepcopy(this.oauth);
-      oauth.token = req.query.code;
+      oauth.token = req.session.crunch.oauth_token;
       oauth.token_secret = req.session.crunch.oauth_token_secret;
+      oauth.verifier = req.query.code;
 
       request({
         url: AUTH_API_BASE + '/oauth/access_token',
         method: 'POST',
         oauth: oauth
       }, function(error, response, body) {
-        if (error) {
-          reject({ error, body })
-        } else {
-          resolve(body);
-        };
+        if (error) reject(error);
+        var data = qs.parse(body);
+        resolve(data);
       });
-
     });
   }
 }

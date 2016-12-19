@@ -22,24 +22,3 @@ module.exports = function(req, res, next) {
     });
   }
 }
-
-
-// DEV ONLY
-// module.exports = function(req, res, next) {
-//
-//   var userId = '1';
-//   var email = 'steve.king5891@gmail.com';
-//
-//   User.getByUserId(userId, theUser => {
-//     if (theUser) { // Existing user found
-//       req.user = theUser;
-//       // console.log(req.user);
-//       next();
-//     } else { // User not found in the DB. Create and return a new one
-//       User.create(userId, email, newUser => {
-//         req.user = newUser;
-//         next();
-//       });
-//     }
-//   });
-// }
