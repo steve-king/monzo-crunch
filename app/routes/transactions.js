@@ -12,7 +12,9 @@ router.post('/', (req, res) => {
   // PATCH completed expenses to Monzo
   // POST confirmation to Monzo feed
 
-  res.json({ success: true })
+  console.log('MONZO TRANSACTION RECEIVED:');
+  console.log(req.body);
+  res.json({ success: true });
 });
 
 module.exports = router;
