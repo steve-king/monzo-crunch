@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "",
-    "start": "npm run dev",
+    "start": "npm run production",
     "dev": "NODE_ENV=local nodemon app/index.js --ignore node_modules/ --ignore app/public",
     "production": "NODE_ENV=production node app/index.js"
   },
