@@ -180,6 +180,7 @@ class Monzo {
         }
       }, (error, r, body) => {
         var data = JSON.parse(body);
+        console.log(data);
         if (!error && r.statusCode == 200) {
           resolve(data);
         } else {
