@@ -21,7 +21,7 @@ router.post('/', (req, res) => {
   var amount = '£'+(Math.abs(transaction.data.amount)/100).toFixed(2);
   var feedItemParams = {
     title: '📡 Transaction received',
-    image_url: BASE_URL+'/images/logo.png',
+    image_url: BASE_URL+'/images/crunch-icon.png',
     body: amount+' at '+transaction.data.merchant.name
   };
 
