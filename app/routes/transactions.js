@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const BASE_URL = process.env.BASE_URL;
 
 const Monzo = require('../services/Monzo');
 const User = require('../services/User');
@@ -17,10 +18,11 @@ router.post('/', (req, res) => {
   console.log(transaction);
 
   var account_id = transaction.data.account_id;
+  var amount = '£'+(Math.abs(transaction.data.amount)/100).toFixed(2);
   var feedItemParams = {
-    title: 'I can see you...',
-    image_url: 'https://www.crunch.co.uk/favicons/apple-touch-icon-180x180.png',
-    body: 'Spending your money at '+transaction.data.merchant.name
+    title: '📡 Transaction received',
+    image_url: BASE_URL+'/images/parrot.gif',
+    body: amount+' at '+transaction.data.merchant.name
   };
 
   User.getByMonzoAccountId(account_id)
