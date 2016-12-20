@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "test": "",
-    "dev": "nodemon app/index.js --ignore node_modules/ --ignore app/public",
-    "start": "node app/index.js"
+    "start": "npm run dev",
+    "dev": "NODE_ENV=local nodemon app/index.js --ignore node_modules/ --ignore app/public",
+    "production": "NODE_ENV=production node app/index.js"
   },
   "dependencies": {
     "connect-ensure-login": "^0.1.1",

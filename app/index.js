@@ -1,8 +1,12 @@
-require('dotenv').config();
 const express = require('express');
 const app = express();
-const morgan = require('morgan');
-app.use(morgan('dev'));
+
+console.log('NODE_ENV: '+process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'local') {
+  require('dotenv').config();
+  const morgan = require('morgan');
+  app.use(morgan('dev'));
+}
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
