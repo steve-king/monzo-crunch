@@ -19,11 +19,26 @@ router.get('/', getUser, (req, res) => {
   //     });
   //   })
   //   .catch(error => res.send(error));
-  // } else {
+
+  var access_token = req.user.monzo.access_token;
+  var account_id = req.user.monzo.accounts[0].id;
+
+  var data = {};
+
+  if (req.user.monzo) {
+    Monzo.listWebhooks(access_token, account_id)
+    .then(webhooks => {
+      res.render('profile', {
+        user: req.user,
+        data: data
+      });
+    })
+    .catch(error => res.json(error));
+  } else {
     res.render('profile', {
       user: req.user,
     });
-  // }
+  }
 
 });
 

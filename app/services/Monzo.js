@@ -103,9 +103,10 @@ class Monzo {
       }, (e, r, body) => {
         if (e) { reject(e); } else {
           var data = JSON.parse(body);
+          console.log(body);
           console.log('LIST WEBOOKS:' + data);
-          if (data.webooks) {
-            resolve(data.webhooks);
+          if (data) {
+            resolve(data);
           } else {
             resolve([]);
           }

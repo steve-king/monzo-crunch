@@ -1,12 +1,27 @@
 {
-  "name": "munch",
+  "name": "monzo-crunch",
+  "private": true,
   "version": "1.0.0",
+  "description": "",
+  "main": "app/index.js",
+  "dependencies": {},
+  "devDependencies": {},
   "scripts": {
-    "test": "",
     "start": "npm run production",
     "dev": "NODE_ENV=local nodemon app/index.js --ignore node_modules/ --ignore app/public",
     "production": "NODE_ENV=production node app/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steve-king/monzo-crunch.git"
+  },
+  "keywords": [],
+  "author": "Steve King",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/steve-king/monzo-crunch/issues"
+  },
+  "homepage": "https://github.com/steve-king/monzo-crunch#readme",
   "dependencies": {
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "^1.4.3",

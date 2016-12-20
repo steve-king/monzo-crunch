@@ -18,6 +18,13 @@
       <li>Card balance: £<%=balance.balance %></li>
     </ul>
     <% } %>
+    <% if (locals.data.webhooks) { %>
+    <ul>
+      <% for( var i in data.webhooks) { %>
+      <li>Webhook: <%=data.webhooks[i].id %> | <%=data.webhooks[i].url %></li>
+      <% } %>
+    </ul>
+    <% } %>
     <p><a href="/monzo/disconnect">Disconnect Monzo</a></p>
   <% } else { %>
     <p><a href="/monzo/login">Connect Monzo</a></p>
