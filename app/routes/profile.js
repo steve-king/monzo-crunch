@@ -1,3 +1,5 @@
+"use strict";
+
 const express = require('express');
 const router = express.Router();
 const getUser = require('../middleware/user');
@@ -20,12 +22,11 @@ router.get('/', getUser, (req, res) => {
   //   })
   //   .catch(error => res.send(error));
 
-  var access_token = req.user.monzo.access_token;
-  var account_id = req.user.monzo.accounts[0].id;
-
-  var data = {};
-
   if (req.user.monzo) {
+    let access_token = req.user.monzo.access_token;
+    let account_id = req.user.monzo.accounts[0].id;
+    let data = {};
+
     Monzo.listWebhooks(access_token, account_id)
     .then(webhooks => {
       res.render('profile', {
