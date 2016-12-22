@@ -10,6 +10,28 @@ const CLIENT_SECRET = process.env.MONZO_CLIENT_SECRET;
 const AUTH_REDIRECT_URL = BASE_URL + '/monzo/connect';
 
 class Monzo {
+
+  callApi(access_token, path, method, form) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+path,
+        method,
+        form,
+        auth: { bearer: access_token }
+      }, (error, response, body) => {
+        var data = JSON.parse(body);
+        if (error || response.statusCode !== 200) {
+          reject({
+            status: response.statusCode,
+            error: error || data
+          });
+        } else {
+          resolve(data);
+        }
+      })
+    })
+  }
+
   getAuthURL(req) {
     req.session.oAuthStateSecret = crypto.randomBytes(64).toString('hex');
     return url.format({
@@ -195,28 +217,10 @@ class Monzo {
   }
 
   postFeedItem(access_token, account_id, params) {
-    return new Promise((resolve, reject) => {
-      request({
-        url: API_BASE+'/feed/',
-        method: 'POST',
-        auth: { bearer: access_token },
-        form: {
-          account_id: account_id,
-          type: 'basic',
-          params
-        }
-      }, (error, r, body) => {
-        var data = JSON.parse(body);
-        console.log(data);
-        if (!error && r.statusCode == 200) {
-          resolve(data);
-        } else {
-          reject({
-            status: r.statusCode,
-            error: error || data
-          });
-        }
-      });
+    return this.callApi(access_token, '/feed/', 'POST', {
+      account_id: account_id,
+      type: 'basic',
+      params
     });
   }
 };
