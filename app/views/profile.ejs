@@ -12,6 +12,8 @@
       <li>Name: <%=user.monzo.accounts[0].description %></li>
       <li>User ID: <%=user.monzo.user_id %></li>
       <li>Account ID: <%=user.monzo.accounts[0].id %></li>
+      <li>Access token: <input type="text" value="<%=user.monzo.access_token %>" /></li>
+      <li>Refresh token: <input type="text" value="<%=user.monzo.refresh_token %>" /></li>
     </ul>
     <% if (locals.balance) { %>
     <ul>

@@ -14,10 +14,9 @@ const User = require('./User');
 class Monzo {
 
   constructor(user) {
+    this.config = {};
     this.configure(user);
   }
-
-  config = {}
 
   configure(user) {
     this.config.auth0_id = user.id;
