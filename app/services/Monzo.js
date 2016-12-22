@@ -17,22 +17,27 @@ class Monzo {
     this.configure(user);
   }
 
+  config = {}
+
   configure(user) {
-    this.auth0_id = user.id;
-    this.access_token = user.monzo.access_token;
-    this.refresh_token = user.monzo.refresh_token;
-    this.user_id = user.monzo.user_id;
-    this.account_id = user.monzo.accounts[0].id;
+    this.config.auth0_id = user.id;
+
+    if (user.monzo) {
+      this.config.access_token = user.monzo.access_token;
+      this.config.refresh_token = user.monzo.refresh_token;
+      this.config.user_id = user.monzo.user_id;
+      this.config.account_id = user.monzo.accounts[0].id;
+    }
   }
 
   authenticatedRequest(path, method, form) {
-    console.log('authenticatedRequest');
+
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+path,
         method,
         form,
-        auth: { bearer: this.access_token }
+        auth: { bearer: this.config.access_token }
       }, (error, response) => {
         if (error) { reject(error); return; }
 
@@ -58,7 +63,7 @@ class Monzo {
 
   postFeedItem(feedItem) {
     return this.authenticatedRequest('/feed/', 'POST', {
-      account_id: this.account_id,
+      account_id: this.config.account_id,
       type: 'basic',
       params: feedItem
     });
@@ -100,6 +105,7 @@ class Monzo {
           if (e) reject(e);
 
           var data = JSON.parse(body);
+
           resolve({
             user_id: data.user_id,
             access_token: data.access_token,
@@ -121,14 +127,14 @@ class Monzo {
           grant_type: 'refresh_token',
           client_id: CLIENT_ID,
           client_secret: CLIENT_SECRET,
-          refresh_token: this.refresh_token
+          refresh_token: this.config.refresh_token
         }
       }, (e, r, body) => {
         var data = JSON.parse(body);
         if (!e && r.statusCode == 200) {
 
           console.log('REFRESH TOKEN RECEIVED');
-          User.set(this.auth0_id, { monzo: {
+          User.set(this.config.auth0_id, { monzo: {
             access_token: data.access_token,
             refresh_token: data.refresh_token
           }})
@@ -148,35 +154,6 @@ class Monzo {
       })
     })
   }
-
-
-  // refreshTokens(user) {
-  //   return new Promise((resolve, reject) => {
-  //     request({
-  //       url: API_BASE+'/oauth2/token',
-  //       method: 'POST',
-  //       form: {
-  //         grant_type: 'refresh_token',
-  //         client_id: CLIENT_ID,
-  //         client_secret: CLIENT_SECRET,
-  //         refresh_token: user.monzo.refresh_token
-  //       }
-  //     }, (e, r, body) => {
-  //       var data = JSON.parse(body);
-  //       if (!e && r.statusCode == 200) {
-  //         resolve({
-  //           access_token: data.access_token,
-  //           refresh_token: data.refresh_token
-  //         });
-  //       } else {
-  //         reject({
-  //           status: r.statusCode,
-  //           error: e || data
-  //         });
-  //       }
-  //     })
-  //   })
-  // }
 
   static getAccounts(access_token) {
     return new Promise((resolve, reject) => {
@@ -287,8 +264,6 @@ class Monzo {
       });
     })
   }
-
-
 };
 
 module.exports = Monzo;
