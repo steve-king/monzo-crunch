@@ -19,7 +19,7 @@ router.post('/', (req, res) => {
   var account_id = transaction.data.account_id;
   var amount = '£'+(Math.abs(transaction.data.amount)/100).toFixed(2);
   var feedItem = {
-    title: '📡 Transaction received',
+    title: '🐡 Transaction received',
     image_url: BASE_URL+'/images/crunch-icon.png',
     body: amount+' at '+transaction.data.merchant.name
   };
