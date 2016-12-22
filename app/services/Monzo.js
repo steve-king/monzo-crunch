@@ -9,30 +9,62 @@ const CLIENT_ID = process.env.MONZO_CLIENT_ID;
 const CLIENT_SECRET = process.env.MONZO_CLIENT_SECRET;
 const AUTH_REDIRECT_URL = BASE_URL + '/monzo/connect';
 
+const User = require('./User');
+
 class Monzo {
 
-  callApi(access_token, path, method, form) {
+  constructor(user) {
+    this.configure(user);
+  }
+
+  configure(user) {
+    this.auth0_id = user.id;
+    this.access_token = user.monzo.access_token;
+    this.refresh_token = user.monzo.refresh_token;
+    this.user_id = user.monzo.user_id;
+    this.account_id = user.monzo.accounts[0].id;
+  }
+
+  authenticatedRequest(path, method, form) {
+    console.log('authenticatedRequest');
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+path,
         method,
         form,
-        auth: { bearer: access_token }
-      }, (error, response, body) => {
-        var data = JSON.parse(body);
-        if (error || response.statusCode !== 200) {
-          reject({
-            status: response.statusCode,
-            error: error || data
-          });
+        auth: { bearer: this.access_token }
+      }, (error, response) => {
+        if (error) { reject(error); return; }
+
+        var body = JSON.parse(response.body);
+
+        if (response.statusCode === 200) { // Success
+          resolve(body);
+        } else
+        if (response.statusCode === 401 && body.error === 'invalid_token') {
+
+          // Refresh the access token and try again
+          this.refreshToken()
+          .then(() => this.authenticatedRequest(path, method, form))
+          .then(() => resolve(secondAttempt))
+          .catch(error => reject(error));
+
         } else {
-          resolve(data);
+          reject(body);
         }
       })
     })
   }
 
-  getAuthURL(req) {
+  postFeedItem(feedItem) {
+    return this.authenticatedRequest('/feed/', 'POST', {
+      account_id: this.account_id,
+      type: 'basic',
+      params: feedItem
+    });
+  }
+
+  static getAuthURL(req) {
     req.session.oAuthStateSecret = crypto.randomBytes(64).toString('hex');
     return url.format({
       protocol: 'https',
@@ -46,7 +78,7 @@ class Monzo {
     })
   }
 
-  getAccessToken(req) {
+  static getAccessToken(req) {
     return new Promise((resolve, reject) => {
       if (!req.query.code) {
         reject('Missing auth code');
@@ -78,8 +110,10 @@ class Monzo {
     });
   }
 
-  refreshTokens(refresh_token) {
+  refreshToken() {
+    console.log('INVALID TOKEN 🤔');
     return new Promise((resolve, reject) => {
+      console.log('REFRESH TOKEN REQUEST');
       request({
         url: API_BASE+'/oauth2/token',
         method: 'POST',
@@ -87,26 +121,64 @@ class Monzo {
           grant_type: 'refresh_token',
           client_id: CLIENT_ID,
           client_secret: CLIENT_SECRET,
-          refresh_token
+          refresh_token: this.refresh_token
         }
       }, (e, r, body) => {
         var data = JSON.parse(body);
         if (!e && r.statusCode == 200) {
-          resolve({
+
+          console.log('REFRESH TOKEN RECEIVED');
+          User.set(this.auth0_id, { monzo: {
             access_token: data.access_token,
             refresh_token: data.refresh_token
-          });
+          }})
+          .then((updatedUser) => {
+            this.configure(updatedUser);
+            console.log('USER UPDATED');
+            resolve();
+          })
+          .catch(error => reject(error));
+
         } else {
           reject({
             status: r.statusCode,
-            error: error || data
+            error: e || data
           });
         }
       })
     })
   }
 
-  getAccounts(access_token) {
+
+  // refreshTokens(user) {
+  //   return new Promise((resolve, reject) => {
+  //     request({
+  //       url: API_BASE+'/oauth2/token',
+  //       method: 'POST',
+  //       form: {
+  //         grant_type: 'refresh_token',
+  //         client_id: CLIENT_ID,
+  //         client_secret: CLIENT_SECRET,
+  //         refresh_token: user.monzo.refresh_token
+  //       }
+  //     }, (e, r, body) => {
+  //       var data = JSON.parse(body);
+  //       if (!e && r.statusCode == 200) {
+  //         resolve({
+  //           access_token: data.access_token,
+  //           refresh_token: data.refresh_token
+  //         });
+  //       } else {
+  //         reject({
+  //           status: r.statusCode,
+  //           error: e || data
+  //         });
+  //       }
+  //     })
+  //   })
+  // }
+
+  static getAccounts(access_token) {
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+'/accounts',
@@ -121,7 +193,7 @@ class Monzo {
     });
   }
 
-  registerWebhook(access_token, account_id) {
+  static registerWebhook(access_token, account_id) {
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+'/webhooks',
@@ -141,7 +213,7 @@ class Monzo {
     });
   }
 
-  listWebhooks(access_token, account_id) {
+  static listWebhooks(access_token, account_id) {
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+'/webhooks&account_id='+account_id,
@@ -162,7 +234,7 @@ class Monzo {
     });
   }
 
-  deleteWebhook(access_token, webhook) {
+  static deleteWebhook(access_token, webhook) {
     console.log('DELETE WEBOOK: ' + webhook.id + ' ' + webhook.url);
     return new Promise((resolve, reject) => {
       request({
@@ -178,7 +250,7 @@ class Monzo {
     });
   }
 
-  getBalance(access_token, account_id) {
+  static getBalance(access_token, account_id) {
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+'/balance&account_id='+account_id,
@@ -197,7 +269,7 @@ class Monzo {
     })
   }
 
-  getTransactions(access_token, account_id) {
+  static getTransactions(access_token, account_id) {
     return new Promise((resolve, reject) => {
       request({
         url: API_BASE+'/transactions&account_id='+account_id,
@@ -216,13 +288,7 @@ class Monzo {
     })
   }
 
-  postFeedItem(access_token, account_id, params) {
-    return this.callApi(access_token, '/feed/', 'POST', {
-      account_id: account_id,
-      type: 'basic',
-      params
-    });
-  }
+
 };
 
-module.exports = new Monzo();
+module.exports = Monzo;

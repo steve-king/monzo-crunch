@@ -8,7 +8,7 @@ router.use('/login', (req, res) => {
   res.redirect(Monzo.getAuthURL(req));
 });
 
-router.get('/connect', (req, res) => {
+router.get('/connect', (req, res) => {  
   Monzo.getAccessToken(req)
     .then((data) => User.set(req.user.id, { monzo: data }))
     .then((user) => Monzo.getAccounts(user.monzo.access_token))
