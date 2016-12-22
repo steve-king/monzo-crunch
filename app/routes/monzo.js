@@ -24,7 +24,7 @@ router.get('/disconnect', (req, res) => {
       .then(webhooks => {
         if (webhooks.length > 0) {
           var deleted = webhooks.map((webhook) => {
-            return Monzo.deleteWebhook(webhook.id);
+            return Monzo.deleteWebhook(user.monzo.access_token, webhook);
           });
           return Promise.all(deleted);
         } else {

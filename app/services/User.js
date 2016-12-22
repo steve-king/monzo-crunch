@@ -25,7 +25,6 @@ class User {
     return new Promise((resolve, reject) => {
       this.collection.findOne({ 'monzo.accounts.0.id': account_id }, (error, result) => {
         if (error) reject(error);
-        console.log(result);
         resolve(result);
       })
     })

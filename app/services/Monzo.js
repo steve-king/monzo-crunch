@@ -9,8 +9,6 @@ const CLIENT_ID = process.env.MONZO_CLIENT_ID;
 const CLIENT_SECRET = process.env.MONZO_CLIENT_SECRET;
 const AUTH_REDIRECT_URL = BASE_URL + '/monzo/connect';
 
-const User = require('./User');
-
 class Monzo {
   getAuthURL(req) {
     req.session.oAuthStateSecret = crypto.randomBytes(64).toString('hex');
@@ -28,7 +26,6 @@ class Monzo {
 
   getAccessToken(req) {
     return new Promise((resolve, reject) => {
-
       if (!req.query.code) {
         reject('Missing auth code');
       } else
@@ -57,6 +54,34 @@ class Monzo {
         });
       }
     });
+  }
+
+  refreshTokens(refresh_token) {
+    return new Promise((resolve, reject) => {
+      request({
+        url: API_BASE+'/oauth2/token',
+        method: 'POST',
+        form: {
+          grant_type: 'refresh_token',
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+          refresh_token
+        }
+      }, (e, r, body) => {
+        var data = JSON.parse(body);
+        if (!e && r.statusCode == 200) {
+          resolve({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token
+          });
+        } else {
+          reject({
+            status: r.statusCode,
+            error: error || data
+          });
+        }
+      })
+    })
   }
 
   getAccounts(access_token) {
@@ -105,8 +130,8 @@ class Monzo {
           var data = JSON.parse(body);
           console.log(body);
           console.log('LIST WEBOOKS:' + data);
-          if (data) {
-            resolve(data);
+          if (data.webhooks) {
+            resolve(data.webhooks);
           } else {
             resolve([]);
           }
@@ -115,15 +140,16 @@ class Monzo {
     });
   }
 
-  deleteWebhooks(access_token, webhooks) {
+  deleteWebhook(access_token, webhook) {
+    console.log('DELETE WEBOOK: ' + webhook.id + ' ' + webhook.url);
     return new Promise((resolve, reject) => {
       request({
-        url: API_BASE+'/webhooks/'+webhook_id,
+        url: API_BASE+'/webhooks/'+webhook.id,
         method: 'DELETE',
         auth: { bearer: access_token }
       }, (e, r, body) => {
         if (e) { reject(e); } else {
-          console.log('DELETE WEBOOK:' + body);
+          console.log('DELETED WEBOOK:' + body);
           resolve(JSON.parse(body));
         }
       });
