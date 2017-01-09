@@ -1,0 +1,34 @@
+user.settings = {
+  expenses: [
+    {
+      keyword: "Lunch",
+      expenseTypeId: 23, // Subsistence (not entertaining)
+      supplierId: "2" // Food & Drink
+      lineItem : {
+        description: null // defaults to [keyword]
+        addMerchant: true // '[keyword] @ [merchant]'
+      },
+      addNotes: true
+    },
+    {
+      keyword: "Drinks",
+      expenseTypeId: 23, // Entertainment
+      supplierId: "2", // Food & Drink
+      lineItem: {
+        description: "Drinks with client",
+        addMerchant: false
+      },
+      addNotes: true
+    },
+    {
+      keyword: "Batteries",
+      expenseTypeId: 3, // Computer consumables
+      supplierId: "4", // IT equipment
+      lineItem: {
+        description: null,
+        addMerchant: false
+      },
+      addNotes: true
+    }
+  ]
+}

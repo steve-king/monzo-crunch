@@ -29,7 +29,8 @@ router.post('/', (req, res) => {
   User.getByMonzoAccountId(account_id)
   .then((theUser) => {
     monzo = new Monzo(theUser);
-    return monzo.postFeedItem(feedItem)
+    // return monzo.postFeedItem(feedItem)
+    return monzo;
   })
   .then(() => res.json({ success: true }))
   .catch(e => res.json(e));
